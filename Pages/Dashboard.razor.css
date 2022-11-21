@@ -142,10 +142,4 @@ td{
     border-bottom: solid 1px rgba(192, 191, 191, 0.3);
 }
 
-.arrow-section{
-    display: flex; 
-    justify-content: center; 
-    gap: 60px;
-}
-
 
