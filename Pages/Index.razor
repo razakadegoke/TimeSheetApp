@@ -1,0 +1,129 @@
+﻿@* 
+	Cette page est la page d'authentification.
+	Deux callToAction : se connecter , créer un compte, une animation permet de séparer les 
+	deux parties. Avant de pouvoir aller à l'écran d'acceuil l'utilisateur dois d'abord créer un 
+	compte qui sera ensuite sauvegarder dans la DB TimeSheet.db.
+
+	Bug to fix:
+	-Auto incrémentation du Id lors de la création d'un nouveau compte qui ne marche pas toujours.
+	-L'affichage des messages d'erreur de la section se connceter ne s'affiche pas toujours.
+	-Apres la création du compte ne navigue vers la page d'acceuil, obliger de se connecter.
+	-Creéer plus de composante pour rendre le code plus clean.
+	-Faire le responsive de la page.
+ *@
+
+@page "/"
+@* Layout vide pour respecter mon design *@
+@layout EmptyLayout
+@using TimeSheetApp.Auth
+@* Api REST pour fetch les données de la DB *@
+@inject UserAccountService userAccountService
+@* Le service qui permet d'authentifier l'utilisateur *@
+@inject AuthenticationStateProvider authStateProvider
+@* Le service qui permet de naviguer entre les pages *@
+@inject NavigationManager navManager
+
+<div class="@changeSection" id="container">
+	@* Section d'authentification *@
+	<div class="form-container sign-up-container">
+		<form>
+			<h1>Créer un compte</h1>
+			<input @bind="userName" type="text" placeholder="Nom d'utilisateur" />
+			<input @bind="email" type="email" placeholder="Email" />
+			<input @bind="password" type="password" placeholder="Mot de passe" />
+			<button @onclick="CreateNewAccount">Créer un compte</button>
+		</form>
+	</div>
+	<div class="form-container sign-in-container">
+		<form>
+			<h1>Se connecter </h1>
+			<div style="width: 100%; text-align: left;">
+				<input @bind="userName" type="text" placeholder="Nom d'utilisateur" />
+				<p class="invalid-input">@invalidEmail</p>
+			</div>
+			<div style="width: 100%; text-align: left;">
+				<input @bind="password" type="password" placeholder="Mot de passe" />
+				<p class="invalid-input">@invalidPassword</p>
+			</div>
+			<button @onclick="Auth">Se connecter</button>
+		</form>
+	</div>
+	@* Section pour changer le formulaire *@
+	<div class="overlay-container">
+		<div class="overlay">
+			<div class="overlay-panel overlay-left">
+				<h1>Bienvenue!</h1>
+				<p>Identifiez-vous à l'aide de vos renseignements personnels.</p>
+				<button class="ghost" id="signIn" @onclick="LogInAccountView">Se connecter</button>
+			</div>
+			<div class="overlay-panel overlay-right">
+				<h1>Inscrit Toi!</h1>
+				<p>Gardez le contrôle de vos horaires de travail.</p>
+				<button class="ghost" id="signUp" @onclick="CreateAccountView">Créer un compte</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+@code 
+{
+    private string changeSection = "container";
+	public string invalidEmail = "";
+	public string invalidPassword = "";
+	public string? userName; 
+	public string? password;
+	public string? email;
+
+	//Permet de créer un nouvelle utilisateur qui sera sauvegarder dans la DB et la fonction UpdateAuthState
+	//va créer l'identité qui sera utiliser par CustomAuthStateProvider pour l'authentificaiton.
+	private async Task CreateNewAccount()
+	{
+		var userAccount = await userAccountService.CreateNewAccount(new UserAccount 
+		{
+			UserName = userName,
+			Password = password,
+			Email = email,
+		});
+
+		var customAuthStateProvider = (CustomAuthStateProvider)authStateProvider;
+		await customAuthStateProvider.UpdateAuthState(new UserSession
+		{
+			UserName = userAccount.UserName
+		});
+		navManager.NavigateTo("/dashboard",true);
+	}
+
+	//Fetch l'utilisateur qui match le userName mit en paramètre dans la method GetByUserName
+	//si il y a un match on update l'identité du CustomAuthStateProvider et on redirige l'utilisateur vers la page d'acceuil
+	//sinon on affiche un message d'erreur à l'écran de l'utilisateur lui demandant de corriger ces erreurs
+	private async Task Auth()
+	{
+		var userAccount = userAccountService.GetByUserName(userName);
+		if(userAccount == null || userAccount.Password != password)
+		{
+			invalidEmail = "*L'adresse email est invalide";
+			invalidPassword = "*Le mot de passe est invalide";
+			userName = "";
+			password = "";
+			return;
+		}
+
+		var customAuthStateProvider = (CustomAuthStateProvider)authStateProvider;
+		await customAuthStateProvider.UpdateAuthState(new UserSession
+		{
+			UserName = userAccount.UserName
+		});
+		navManager.NavigateTo("/dashboard",true);
+	}
+    //Quand l'utilisateur click sur un des buttons qui se trouvent dans les section avec un background-color-gradiant, ceci change 
+    //la valeur de la class du div principal et applique les propriétés qui permettent que l'aniamtion fonctionne. 
+    private void CreateAccountView()
+    {
+        changeSection = "container right-panel-active";
+    }
+        private void LogInAccountView()
+    {
+        changeSection = "container";
+    }
+}

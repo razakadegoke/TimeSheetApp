@@ -1,0 +1,130 @@
+@* 
+  Sur cette page l'utilisateur authentifier est censé avoir acces a sa grille horaire et pourvoir 
+  exécuter des commandes CRUD sur celle-ci. 
+
+  Bug to fix or features to add:
+  -La possibilité de pouvoir changer de semaine.
+  -La possibilité de pouvoir ajouter et modifier les données d'une row dans la table.
+  -Créer un Model qui permet de sauvegarder les rows de l'élément HTML table dans une table dans la DB.
+  -Afficher le nombre d'heure travailler.
+  -Le responsive de la page.
+*@
+
+@page "/dashboard"
+@layout MainLayout 
+
+@using TimeSheetApp.Data
+@using TimeSheetApp.Auth
+@* Objet qui créer automatiquement les données nécessaire de la semaine courante afin de les afficher *@
+@inject Week week
+@* Api REST pour fetch les données de la DB *@
+@inject UserAccountService userAccountService
+@* Le service qui permet d'authentifier l'utilisateur *@
+@inject AuthenticationStateProvider authStateProvider
+
+<section>
+    <div class="info-section">
+        <div>
+            <h1>Horaire</h1>
+            <AuthorizeView>
+              <Authorized>
+                <p class="links_name">Bienvenue @context.User.Identity.Name!</p>
+              </Authorized>
+              <NotAuthorized>
+                <span class="links_name"></span>
+              </NotAuthorized>
+           </AuthorizeView>
+            <p>@week.firstDayOfWeek.Day @week.firstDayOfWeekMouth - @week.lastDayOfWeek.Day @week.lastDayOfWeekMouth @week.firstDayOfWeek.Year </p>
+        </div>
+    </div>
+    <div class="tbl-header">
+    <table cellpadding="0" cellspacing="0" border="0">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Entré</th>
+          <th>Sortie</th>
+        </tr>
+      </thead>
+    </table>
+  </div>
+  <div class="tbl-content">
+    @* Formate et affiche les jours de la semaine courante *Components* *@
+    <table cellpadding="0" cellspacing="0" border="0">
+      <tbody>
+            @foreach (var item in week.daysInWeek)
+            {
+            <tr @onclick="ShowingEditView">
+                <td>@item.Day
+                @switch (Convert.ToString(item.DayOfWeek))
+                {
+                    case "Monday":
+                        <span> Lun</span>
+                        break;
+                    case "Tuesday":
+                        <span> Mar</span>
+                        break;
+                    case "Wednesday":
+                        <span> Mer</span>
+                        break;
+                    case "Thursday":
+                        <span> Jeu</span>
+                        break;
+                    case "Friday":
+                        <span> Ven</span>
+                        break;
+                    case "Saturday":
+                        <span> Sam</span>
+                        break;
+                    case "Sunday":
+                        <span> Dim</span>
+                        break;
+                        default:
+                            break;
+                }
+                </td>
+                <td></td>
+                <td></td>
+            </tr>
+            }
+      </tbody>
+    </table>
+  </div>
+</section>
+
+@* Permet d'afficher le pop-up quand l'utilisateur clic sur un row *@
+@if (showEditView == true)
+{
+  <div class="dialog-container">
+    <div class="dialog" >
+      <p @onclick="HidingEditView" >Fermer</p>
+      <div>
+        <label>Entrée:</label>
+        <input @bind="inHour" type="time">
+      </div>
+      <div>
+        <label>Sortie : </label>
+        <input @bind="outHour" type="time">
+      </div>
+    </div>
+  </div>  
+}
+
+
+@code {
+  public DateTime inHour;
+  public DateTime outHour;
+  //Ligne 102 - 112: Affichage du pop-up en fonction de la valeur showEditView(true ou false)
+  public bool showEditView;
+
+  public void ShowingEditView()
+  {
+    showEditView = true;
+  }
+
+    public void HidingEditView()
+  {
+    showEditView = false;
+  }
+  
+}

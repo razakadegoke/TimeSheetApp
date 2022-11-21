@@ -1,0 +1,33 @@
+﻿@using Microsoft.AspNetCore.Components.Web
+@namespace TimeSheetApp.Pages
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <base href="~/" />
+    <link rel="stylesheet" href="css/bootstrap/bootstrap.min.css" />
+    <link href='https://unpkg.com/boxicons@2.0.7/css/boxicons.min.css' rel='stylesheet'>
+    <link href="css/site.css" rel="stylesheet" />
+    <link href="TimeSheetApp.styles.css" rel="stylesheet" />
+    <component type="typeof(HeadOutlet)" render-mode="ServerPrerendered" />
+</head>
+<body>
+    @RenderBody()
+
+    <div id="blazor-error-ui">
+        <environment include="Staging,Production"> 
+            Une erreur est survenue. Cette application peut ne plus répondre jusqu'à ce qu'elle soit rechargée. 
+        </environment>
+        <environment include="Development">
+            Une exception non prise en charge a eu lieu. Voir les outils de développement du navigateur pour plus de détails.
+        </environment>
+        <a href="" class="reload">Recharger</a>
+        <a class="dismiss">🗙</a>
+    </div>
+
+    <script src="_framework/blazor.server.js"></script>
+</body>
+</html>

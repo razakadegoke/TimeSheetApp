@@ -1,0 +1,47 @@
+﻿@using TimeSheetApp.Auth
+@inject UserAccountService userAccountService
+@inject AuthenticationStateProvider authStateProvider
+@inject NavigationManager navManager
+
+<div class="@isClose">
+  <div class="logo-details">
+    <i class='bx bx-menu' id="btn" @onclick="open"></i>
+  </div>
+  <ul class="nav-list">
+    <li>
+      <a href="#">
+        <i class='bx bx-grid-alt'></i>
+        <span class="links_name">Acceuil</span>
+      </a>
+    </li>
+    <li class="profile">
+      <a href="#" style="background-color: #00C3A9;">
+        <i class='bx bx-log-out' id="log_out" ></i>
+        <span class="links_name" @onclick="logOut">Deconnection</span>
+      </a>
+    </li>
+  </ul>
+</div>
+
+@code {
+
+  private string isClose ="sidebar";
+
+  private void open()
+  {
+      if (isClose == "sidebar")
+      {
+          isClose = "open sidebar";
+      }else
+      {
+          isClose = "sidebar";
+      }
+  }
+
+  public async Task logOut()
+  {
+    var customAuthStateProvider = (CustomAuthStateProvider)authStateProvider;
+		await customAuthStateProvider.UpdateAuthState(null);
+    navManager.NavigateTo("/",true); 
+  }
+}
