@@ -6,7 +6,7 @@
 dotnet watch
 ```
 
-## Caractéristique 
+## Caractéristiques
 
 Page d'authentification(UI)
 
